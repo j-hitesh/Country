@@ -5,31 +5,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Post Property</title>
-
+<script src="https://kit.fontawesome.com/e9017f59d4.js" crossorigin="anonymous"></script>
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
+/* Responsive & reset */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html,body { height: 100%; }
 body {
     font-family: Arial, sans-serif;
     background: #f5f7fb;
     margin: 0;
     padding: 0;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    color: #111827;
 }
+
+/* Container */
 .container {
+    width: calc(100% - 40px);
     max-width: 650px;
     margin: 40px auto;
-    background: white;
+    background: #ffffff;
     padding: 30px;
     border-radius: 18px;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.08);
 }
+
+/* Headings */
 h2 {
     font-size: 26px;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin: 0 0 18px 0;
 }
+h4 {
+    margin: 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Tabs (scrollable on small screens) */
 .tab-group, .sub-tabs, .type-tabs {
     display: flex;
     gap: 10px;
@@ -43,19 +62,25 @@ h2 {
     background: #fff;
     cursor: pointer;
     font-weight: 600;
+    white-space: nowrap;
+    transition: background .15s, color .15s, border-color .15s;
 }
 .tab.active, .sub-tab.active, .type-tab.active {
     background: #0057ff;
-    color: white;
+    color: #fff;
     border-color: #0057ff;
 }
-input {
+
+/* Form elements */
+input[type="text"], input[type="tel"] {
     width: 100%;
     padding: 15px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     border: 1px solid #ced3df;
     border-radius: 10px;
     font-size: 15px;
+    outline: none;
+    background: #fff;
 }
 button {
     width: 100%;
@@ -68,12 +93,36 @@ button {
     cursor: pointer;
     font-weight: 600;
 }
-button:hover {
-    background: #0044cc;
+button:hover { background: #0044cc; }
+
+/* Small screens adjustments */
+@media (max-width: 640px) {
+    .container { margin: 18px; padding: 18px; border-radius: 14px; }
+    h2 { font-size: 20px; }
+    h4 { font-size: 14px; margin-top: 10px; }
+    .tab, .sub-tab, .type-tab { padding: 8px 14px; font-size: 14px; border-radius: 999px; }
+    input[type="text"], input[type="tel"] { padding: 12px; font-size: 15px; margin-bottom: 16px; }
+    button { padding: 12px; font-size: 16px; }
+    /* Make tab rows horizontally scrollable instead of wrapping */
+    .tab-group, .sub-tabs, .type-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        margin-bottom: 14px;
+    }
+    .tab-group::-webkit-scrollbar,
+    .sub-tabs::-webkit-scrollbar,
+    .type-tabs::-webkit-scrollbar { height: 8px; }
+    .tab-group::-webkit-scrollbar-thumb,
+    .sub-tabs::-webkit-scrollbar-thumb,
+    .type-tabs::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
 }
-h4 {
-    margin: 10px 0;
-    font-size: 16px;
+
+/* Larger screens spacing */
+@media (min-width: 1200px) {
+    .container { padding: 36px; }
+    h2 { font-size: 28px; }
 }
 </style>
 
@@ -82,33 +131,33 @@ h4 {
 <body>
 
 <div class="container">
-
+   <a href="./final_fixed2.html" class="close-btn " style="float: right; text-decoration: none; color: gray; font-size: 20px;">
+     <i class="fa-solid fa-x"></i>
+   </a>
     <h2>Start posting your property, it’s free</h2>
 
     <!-- SELL / BUY -->
-    <div class="tab-group">
-        <div class="tab active" onclick="selectDeal('sell', this)">Sell</div>
-        <div class="tab" onclick="selectDeal('buy', this)">Buy</div>
+    <div class="tab-group" role="tablist" aria-label="Deal type">
+        <div class="tab active" onclick="selectDeal('sell', this)" role="tab">Sell</div>
+        <div class="tab" onclick="selectDeal('buy', this)" role="tab">Buy</div>
     </div>
 
     <h4>And it's a ...</h4>
 
-    <!-- RESIDENTIAL / COMMERCIAL -->
-    <div class="sub-tabs">
-        <div class="sub-tab active" onclick="selectCategory('residential', this)">Residential</div>
-        <div class="sub-tab" onclick="selectCategory('commercial', this)">Commercial</div>
+    <div class="sub-tabs" role="tablist" aria-label="Category">
+        <div class="sub-tab active" onclick="selectCategory('residential', this)" role="tab">Residential</div>
+        <div class="sub-tab" onclick="selectCategory('commercial', this)" role="tab">Commercial</div>
     </div>
 
-    <!-- PROPERTY TYPE -->
-    <div class="type-tabs">
-        <div class="type-tab active" onclick="selectType('Flat / Apartment', this)">Flat / Apartment</div>
-        <div class="type-tab" onclick="selectType('Independent House / Villa', this)">Independent House / Villa</div>
-        <div class="type-tab" onclick="selectType('Builder Floor', this)">Builder Floor</div>
-        <div class="type-tab" onclick="selectType('Plot / Land', this)">Plot / Land</div>
+    <div class="type-tabs" role="tablist" aria-label="Property type">
+        <div class="type-tab active" onclick="selectType('Flat / Apartment', this)" role="tab">Flat / Apartment</div>
+        <div class="type-tab" onclick="selectType('Independent House / Villa', this)" role="tab">Independent House / Villa</div>
+        <div class="type-tab" onclick="selectType('Builder Floor', this)" role="tab">Builder Floor</div>
+        <div class="type-tab" onclick="selectType('Plot / Land', this)" role="tab">Plot / Land</div>
     </div>
 
     <h4>Your contact details for the buyer to reach you</h4>
-    <input type="text" id="phone" placeholder="Enter phone number">
+    <input type="tel" id="phone" placeholder="Enter phone number" inputmode="tel" pattern="[0-9]*">
 
     <button onclick="submitData()">Start Now</button>
 
@@ -156,7 +205,7 @@ function selectType(val, el) {
 function submitData() {
     const phone = document.getElementById("phone").value.trim();
 
-    if (phone.length < 10) {
+    if (phone.replace(/\D/g, '').length < 10) {
         alert("Please enter a valid phone number");
         return;
     }
