@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Find premium properties for sale & rent in Gurgaon, Delhi, Mumbai. Verified listings, detailed info, direct seller contact. Real estate made simple.">
+    <meta name="keywords" content="properties for sale, flats for rent, buy house Gurgaon Delhi Mumbai, property listing, real estate portal">
+    <title>Country</title>
+     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --color-primary: #1a4d5c;
+            --color-primary-hover: #133a45;
+            --color-secondary: #f0f4f8;
+            --color-accent: #00a8cc;
+            --color-text: #1a1a1a;
+            --color-text-light: #666;
+            --color-border: #e0e0e0;
+            --color-success: #2ecc71;
+            --color-warning: #f39c12;
+            --color-bg: #ffffff;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --spacing-unit: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--color-text);
+            background-color: #f9fafb;
+            line-height: 1.6;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-primary {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-primary a {
+            text-decoration: none;
+            color: var(--color-text);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-primary a:hover {
+            color: var(--color-accent);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn-inquiry {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .btn-inquiry:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-compare {
+            background: var(--color-secondary);
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-compare:hover {
+            background: white;
+            border-color: var(--color-primary);
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #0f3a47 100%);
+            padding: 80px 24px;
+            color: white;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 18px;
+            opacity: 0.95;
+            margin-bottom: 32px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 1400px;
+            margin: -40px auto 0;
+            padding: 0 24px;
+            position: relative;
+            z-index: 50;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .search-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--color-text-light);
+            margin-bottom: 8px;
+        }
+
+        .search-input-group input,
+        .search-input-group select {
+            padding: 12px 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input-group input:focus,
+        .search-input-group select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.1);
+        }
+
+        .btn-search {
+            background: var(--color-primary);
+            color: white;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-search:hover {
+            background: var(--color-primary-hover);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Listings Section */
+        .listings-section {
+            padding: 60px 24px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-header h2 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            font-size: 16px;
+            color: var(--color-text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: var(--color-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .tab-btn:hover:not(.active) {
+            border-color: var(--color-primary);
+        }
+
+        /* Property Grid */
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .property-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #999;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--color-accent);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .property-info {
+            padding: 20px;
+        }
+
+        .property-type {
+            font-size: 12px;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .property-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .property-location {
+            font-size: 14px;
+            color: var(--color-text-light);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .property-specs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .spec {
+            text-align: center;
+        }
+
+        .spec-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .spec-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+        }
+
+        .property-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 12px;
+        }
+
+        .price-suffix {
+            font-size: 12px;
+            color: var(--color-text-light);
+            font-weight: 400;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--color-secondary);
+            padding: 60px 24px;
+            margin: 60px 0;
+        }
+
+        .stats-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--color-text-light);
+            font-weight: 500;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 60px 24px;
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--color-text-light);
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--color-primary);
+            color: white;
+            padding: 48px 24px 24px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .footer-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-section a {
+            display: block;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-box {
+            width: 350px;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            background: #1a4d5c;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            margin-top: 18px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .google-btn {
+            width: 100%;
+            background: #fff;
+            color: #444;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Avatar */
+        #userAvatar {
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #avatarCircle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background:#1a4d5c;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:18px;
+            cursor:pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .search-box {
+                grid-template-columns: 1fr;
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-primary {
+                display: none;
+            }
+
+            .header-container {
+                padding: 12px 16px;
+            }
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-container bg-transparent">
+            <a href="#" class="logo">
+                <img src="https://countryroof.in/upload/logo/1819668946722953.png" alt="" class="w-30 bg-red ">
+            </a>
+            <nav class="nav-primary">
+                <a href="#properties">Properties</a>
+                <a href="#why-us">Why countryroof</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="user-actions">
+                <button class="btn-inquiry" style="margin: 0;">
+                    <a href="./post.html">Post Property</a> 
+                    </button>
+
+                <!-- LOGIN BUTTON -->
+                <button id="loginBtn" class="btn-inquiry" onclick="openLogin()">Login</button>
+
+                <!-- USER AVATAR (after login) -->
+                <div id="userAvatar">
+                    <div id="avatarCircle"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="modal-overlay bg-transparent">
+        <div class="modal-box">
+            <span class="close-btn" onclick="closeLogin()">✕</span>
+            <h2 style="text-align:center; margin-bottom:20px;">Login</h2>
+
+            <!-- GOOGLE LOGIN -->
+            <button class="google-btn" onclick="googleLogin()">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" style="margin-right:8px;">
+                Continue with Google
+            </button>
+
+            <p style="text-align:center; margin:10px 0; color:#777;">or login with email</p>
+
+            <!-- EMAIL/PASSWORD -->
+            <input type="email" id="loginEmail" placeholder="Email" class="modal-input">
+            <input type="password" id="loginPass" placeholder="Password" class="modal-input">
+
+            <button class="modal-btn" onclick="emailLogin()">Login</button>
+
+            <p style="margin-top:15px; text-align:center; font-size:14px;">
+                Don’t have an account?
+                <span style="color:#1a4d5c; cursor:pointer; font-weight:bold;" onclick="switchToSignup()">
+                    Sign Up
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <!-- SIGNUP MODAL -->
+    <div id="signupModal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-btn" onclick="closeSignup()">✕</span>
+            <h2 style="text-align:center; margin-bottom:20px;">Sign Up</h2>
+
+            <input type="text" id="signupName" placeholder="Full Name" class="modal-input">
+            <input type="email" id="signupEmail" placeholder="Email" class="modal-input">
+            <input type="text" id="signupNumber" placeholder="Mobile Number" class="modal-input">
+            <input type="password" id="signupPass" placeholder="Password" class="modal-input">
+
+            <button class="modal-btn" onclick="emailSignup()">Create Account</button>
+
+            <p style="margin-top:15px; text-align:center; font-size:14px;">
+                Already have an account?
+                <span style="color:#1a4d5c; cursor:pointer; font-weight:bold;" onclick="switchToLogin()">
+                    Login
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-btn" onclick="closeProfile()">✕</span>
+            <h2>Your Profile</h2>
+            <p id="profName"></p>
+            <p id="profEmail"></p>
+            <p id="profNumber"></p>
+            <button class="modal-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- HERO BANNER SLIDER (same as tumhara) -->
+    <section>
+        <div class="relative h-[450px] sm:h-[300px] overflow-hidden">
+            <!-- Slide 1: make the .slide wrapper include both image + overlay so JS toggles both -->
+            <div class="slide absolute inset-0 opacity-100 transition-opacity duration-700">
+                <img src="./Image/Image-1.png" class="w-full h-[350px] object-cover">
+                <span class="absolute inset-0 z-10 flex flex-col justify-center items-center text-center px-10 text-white gap-y-4">
+                    <h1 class="text-lg md:text-[32px] pt-3 font-Roboto font-semibold w-[85%]">Search, Compare & Buy Property in India’s Top 4 Cities</h1>
+                    <p class="text-sm md:text-[16px] font-Roboto bg-blue-700 md:w-[29%] px-1">Transparent Prices. Trusted Builders. Smarter Decisions</p>
+                </span>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="slide absolute inset-0 opacity-0 transition-opacity duration-700">
+                <img src="./Image/Image-2.png" class="w-full h-[350px] object-cover">
+                <span class="absolute inset-0 z-10 flex flex-col justify-center items-center text-center px-10 text-white gap-y-4">
+                    <h1 class="text-lg md:text-[32px] pt-3 font-Roboto font-semibold w-[85%]">Premium Properties Across India’s Leading Cities</h1>
+                    <p class="text-sm md:text-[16px] font-Roboto bg-blue-700 md:w-[40%] px-1">Gurugram • Delhi • Mumbai • Noida — All the Best Options in One Place.</p>
+                </span>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="slide absolute inset-0 opacity-0 transition-opacity duration-700">
+                <img src="./Image/Image-3.png" class="w-full h-[350px] object-cover">
+                <span class="absolute inset-0 z-10 flex flex-col justify-center items-center text-center px-10 text-white gap-y-4">
+                    <h1 class="text-lg md:text-[32px] pt-3 font-Roboto font-semibold w-[85%]">India’s Fastest-Growing Real Estate Hotspots — All in One Portal</h1>
+                    <p class="text-sm md:text-[16px] font-Roboto bg-blue-700 md:w-[37%] px-1">Discover High-ROI Properties in Gurugram, Delhi, Mumbai & Noida.</p>
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEARCH BAR -->
+    <section class="search-container">
+        <div class="search-box">
+            <div class="search-input-group">
+                <label>City</label>
+                <select id="city" onchange="updateSearch()">
+                    <option value="">All Cities</option>
+                    <option value="gurgaon">Gurgaon</option>
+                    <option value="delhi">Delhi</option>
+                    <option value="mumbai">Mumbai</option>
+                </select>
+            </div>
+            <div class="search-input-group">
+                <label>Property Type</label>
+                <select id="type" onchange="updateSearch()">
+                    <option value="">All Types</option>
+                    <option value="flat">Flat/Apartment</option>
+                    <option value="house">House</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="land">Land</option>
+                </select>
+            </div>
+            <div class="search-input-group">
+                <label>Budget Range</label>
+                <select id="budget" onchange="updateSearch()">
+                    <option value="">All Prices</option>
+                    <option value="0-50">Up to 50 Lakhs</option>
+                    <option value="50-100">50L - 1Cr</option>
+                    <option value="100-200">1Cr - 2Cr</option>
+                    <option value="200+">Above 2 Crores</option>
+                </select>
+            </div>
+            <div class="search-input-group">
+                <label>Location/Sector</label>
+                <input type="text" id="location" placeholder="e.g., Sector 52, Noida" onkeyup="updateSearch()">
+            </div>
+            <button class="btn-search" onclick="searchProperties()">Search Now</button>
+        </div>
+    </section>
+
+    <!-- PROPERTIES SECTION (cards same) -->
+    <section class="listings-section" id="properties">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Properties</h2>
+                <p>Browse 50,000+ verified properties • Zero brokerage • Transparent pricing</p>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="tab-btn active" onclick="filterByType('all')">All Properties</button>
+                <button class="tab-btn" onclick="filterByType('sale')">Buy</button>
+                <button class="tab-btn" onclick="filterByType('rent')">Rent</button>
+            </div>
+
+            <div class="property-grid" id="propertyGrid">
+                <!-- CARD 1 -->
+                <div class="property-card" data-category="sale" onclick="viewDetails(1)">
+                    <div class="property-image">
+                        <div style=" height: 100%; display: flex; align-items: center; color: white; font-weight: bold;">
+                            <img src="https://luxuryontario.ca/wp-content/uploads/2021/02/Exterior-of-334-Balsam-Drive-Georgian-style-Oakville-real-estate-1600x1067.jpg" class="w-">
+                            <span>
+                                3 BHK Apartment
+                            </span></div>
+                        <span class="badge">Featured</span>
+                    </div>
+                    <div class="property-info">
+                        <div class="property-type">Apartment • Sale</div>
+                        <div class="property-title">Luxury 3 BHK in Sector 52</div>
+                        <div class="property-location">📍 Gurgaon, Haryana</div>
+                        <div class="property-specs">
+                            <div class="spec"><div class="spec-value">3</div><div class="spec-label">BHK</div></div>
+                            <div class="spec"><div class="spec-value">1850</div><div class="spec-label">Sq Ft</div></div>
+                            <div class="spec"><div class="spec-value">Built</div><div class="spec-label">2022</div></div>
+                        </div>
+                        <div class="property-price">₹1.85 Cr <span class="price-suffix">Negotiable</span></div>
+                        <div class="property-footer">
+                            <button class="btn-inquiry" onclick="sendInquiry(event, 1)">Send Inquiry</button>
+                            <button class="btn-compare" onclick="compare(event, 1)">Compare</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2 -->
+                <div class="property-card" data-category="rent" onclick="viewDetails(2)">
+                    <div class="property-image">
+                        <div style="height: 100%; display: flex; align-items: center; color: white; font-weight: bold;">
+                            <img src="https://tse2.mm.bing.net/th/id/OIP.aY6Sb2oNmNYoiQkKzEem7wHaE7?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3">
+                            <span>2 BHK Apartment</span>
+                        </div>
+                        <span class="badge" style="background: var(--color-warning);">New</span>
+                    </div>
+                    <div class="property-info">
+                        <div class="property-type">Apartment • Rent</div>
+                        <div class="property-title">Modern 2 BHK in DLF Phase 3</div>
+                        <div class="property-location">📍 Gurgaon, Haryana</div>
+                        <div class="property-specs">
+                            <div class="spec"><div class="spec-value">2</div><div class="spec-label">BHK</div></div>
+                            <div class="spec"><div class="spec-value">1200</div><div class="spec-label">Sq Ft</div></div>
+                            <div class="spec"><div class="spec-value">Built</div><div class="spec-label">2020</div></div>
+                        </div>
+                        <div class="property-price">₹45,000 <span class="price-suffix">/ Month</span></div>
+                        <div class="property-footer">
+                            <button class="btn-inquiry" onclick="sendInquiry(event, 2)">Send Inquiry</button>
+                            <button class="btn-compare" onclick="compare(event, 2)">Compare</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="property-card" data-category="sale" onclick="viewDetails(3)">
+                    <div class="property-image">
+                        <div style=" height: 100%; display: flex; align-items: center; color: white; font-weight: bold;">
+                            <img src="https://mchi.net/wp-content/uploads/2024/11/real-estate-bhiwadi1.webp" alt="" class="h-60">
+                        </div>
+                        <span class="badge" style="background: var(--color-success);">Verified</span>
+                    </div>
+                    <div class="property-info">
+                        <div class="property-type">Villa • Sale</div>
+                        <div class="property-title">Premium 4 BHK Villa in Prestige Isle</div>
+                        <div class="property-location">📍 Bangalore, Karnataka</div>
+                        <div class="property-specs">
+                            <div class="spec"><div class="spec-value">4</div><div class="spec-label">BHK</div></div>
+                            <div class="spec"><div class="spec-value">3500</div><div class="spec-label">Sq Ft</div></div>
+                            <div class="spec"><div class="spec-value">Built</div><div class="spec-label">2023</div></div>
+                        </div>
+                        <div class="property-price">₹3.2 Cr <span class="price-suffix">Negotiable</span></div>
+                        <div class="property-footer">
+                            <button class="btn-inquiry" onclick="sendInquiry(event, 3)">Send Inquiry</button>
+                            <button class="btn-compare" onclick="compare(event, 3)">Compare</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4 -->
+                <div class="property-card" data-category="rent" onclick="viewDetails(4)">
+                    <div class="property-image">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">Commercial Space</div>
+                        <span class="badge" style="background: var(--color-accent);">Hot</span>
+                    </div>
+                    <div class="property-info">
+                        <div class="property-type">Commercial • Rent</div>
+                        <div class="property-title">Office Space in DLF Cyber Hub</div>
+                        <div class="property-location">📍 Gurgaon, Haryana</div>
+                        <div class="property-specs">
+                            <div class="spec"><div class="spec-value">Open</div><div class="spec-label">Plan</div></div>
+                            <div class="spec"><div class="spec-value">5000</div><div class="spec-label">Sq Ft</div></div>
+                            <div class="spec"><div class="spec-value">Grade</div><div class="spec-label">A++</div></div>
+                        </div>
+                        <div class="property-price">₹80/Sq Ft <span class="price-suffix">/ Month</span></div>
+                        <div class="property-footer">
+                            <button class="btn-inquiry" onclick="sendInquiry(event, 4)">Send Inquiry</button>
+                            <button class="btn-compare" onclick="compare(event, 4)">Compare</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 5 -->
+                <div class="property-card" data-category="sale" onclick="viewDetails(5)">
+                    <div class="property-image">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">2 BHK, South Delhi</div>
+                    </div>
+                    <div class="property-info">
+                        <div class="property-type">Apartment • Sale</div>
+                        <div class="property-title">Spacious 2 BHK in Safdarjung</div>
+                        <div class="property-location">📍 Delhi, NCR</div>
+                        <div class="property-specs">
+                            <div class="spec"><div class="spec-value">2</div><div class="spec-label">BHK</div></div>
+                            <div class="spec"><div class="spec-value">1450</div><div class="spec-label">Sq Ft</div></div>
+                            <div class="spec"><div class="spec-value">Built</div><div class="spec-label">2019</div></div>
+                        </div>
+                        <div class="property-price">₹2.1 Cr <span class="price-suffix">Negotiable</span></div>
+                        <div class="property-footer">
+                            <button class="btn-inquiry" onclick="sendInquiry(event, 5)">Send Inquiry</button>
+                            <button class="btn-compare" onclick="compare(event, 5)">Compare</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 6 -->
+                <div class="property-card" data-category="rent" onclick="viewDetails(6)">
+                    <div class="property-image">
+                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">1 BHK Mumbai</div>
+                    </div>
+                    <div class="property-info">
+                        <div class="property-type">Apartment • Rent</div>
+                        <div class="property-title">Cozy 1 BHK in Powai</div>
+                        <div class="property-location">📍 Mumbai, Maharashtra</div>
+                        <div class="property-specs">
+                            <div class="spec"><div class="spec-value">1</div><div class="spec-label">BHK</div></div>
+                            <div class="spec"><div class="spec-value">650</div><div class="spec-label">Sq Ft</div></div>
+                            <div class="spec"><div class="spec-value">Built</div><div class="spec-label">2021</div></div>
+                        </div>
+                        <div class="property-price">₹65,000 <span class="price-suffix">/ Month</span></div>
+                        <div class="property-footer">
+                            <button class="btn-inquiry" onclick="sendInquiry(event, 6)">Send Inquiry</button>
+                            <button class="btn-compare" onclick="compare(event, 6)">Compare</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-number">45,000+</div>
+                <div class="stat-label">Verified Properties</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">2,80,000+</div>
+                <div class="stat-label">Active Buyers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Customer Satisfaction</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">15+ Years</div>
+                <div class="stat-label">Industry Expertise</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section" id="why-us">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose countryroof?</h2>
+                <p>The most trusted platform for premium properties in India</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">✓</div>
+                    <h3>Verified Listings</h3>
+                    <p>100% verified properties with authentic seller information and legal documentation proof</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure Transactions</h3>
+                    <p>Safe & transparent dealings with encrypted payment gateway and legal protection</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Quick Response</h3>
+                    <p>Direct contact with property owners and agents. Get responses within 24 hours</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Market Insights</h3>
+                    <p>Real-time price trends, market analysis, and property valuation tools</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Filters</h3>
+                    <p>Advanced search filters by location, budget, amenities, and builder reputation</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Optimized</h3>
+                    <p>Seamless experience across all devices. Browse properties anytime, anywhere</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Properties in Cities</h4>
+                <a href="#">Properties in Gurgaon</a>
+                <a href="#">Properties in Delhi</a>
+                <a href="#">Properties in Mumbai</a>
+                <a href="#">Properties in Bangalore</a>
+                <a href="#">Properties in Pune</a>
+            </div>
+            <div class="footer-section">
+                <h4>Property Type</h4>
+                <a href="#">Flats for Sale</a>
+                <a href="#">Flats for Rent</a>
+                <a href="#">Villas for Sale</a>
+                <a href="#">Commercial Spaces</a>
+                <a href="#">Land for Sale</a>
+            </div>
+            <div class="footer-section">
+                <h4>Popular Areas</h4>
+                <a href="#">Sector 47, Gurgaon</a>
+                <a href="#">DLF Phase 3, Gurgaon</a>
+                <a href="#">South Delhi Properties</a>
+                <a href="#">Bandra, Mumbai</a>
+                <a href="#">Indiranagar, Bangalore</a>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <a href="#">About Us</a>
+                <a href="#">Contact Us</a>
+                <a href="#">Blog & Insights</a>
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 countryroof. All rights reserved. | Built with precision for India's premium real estate market</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // HERO SLIDER
+        const slides = document.querySelectorAll(".slide");
+        let currentSlide = 0;
+        setInterval(() => {
+            slides[currentSlide].classList.remove("opacity-100");
+            slides[currentSlide].classList.add("opacity-0");
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.remove("opacity-0");
+            slides[currentSlide].classList.add("opacity-100");
+        }, 4000);
+
+        // State management for filters
+        const appState = {
+            filters: {
+                city: '',
+                type: '',
+                budget: '',
+                location: ''
+            },
+            compared: [],
+            currentFilter: 'all'
+        };
+
+        function searchProperties() {
+            appState.filters.city = document.getElementById('city').value;
+            appState.filters.type = document.getElementById('type').value;
+            appState.filters.budget = document.getElementById('budget').value;
+            appState.filters.location = document.getElementById('location').value;
+            
+            alert(
+                '✓ Search executed!\n\nFilters:\n• City: ' + (appState.filters.city || 'All') +
+                '\n• Type: ' + (appState.filters.type || 'All') +
+                '\n• Budget: ' + (appState.filters.budget || 'All')
+            );
+        }
+
+        function updateSearch() {
+            appState.filters.city = document.getElementById('city').value;
+            appState.filters.type = document.getElementById('type').value;
+            appState.filters.budget = document.getElementById('budget').value;
+            appState.filters.location = document.getElementById('location').value;
+        }
+
+        function filterByType(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            const cards = document.querySelectorAll('.property-card');
+            cards.forEach(card => {
+                const cat = card.getAttribute('data-category');
+                if (type === 'all' || type === cat) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function sendInquiry(event, propertyId) {
+            event.stopPropagation();
+            alert('✓ Inquiry sent successfully!\n\nProperty ID: ' + propertyId + '\n\nThe seller will contact you within 24 hours.');
+        }
+
+        function compare(event, propertyId) {
+            event.stopPropagation();
+            if (appState.compared.includes(propertyId)) {
+                appState.compared = appState.compared.filter(id => id !== propertyId);
+                alert('Property removed from comparison');
+            } else {
+                if (appState.compared.length >= 3) {
+                    alert('You can compare maximum 3 properties');
+                    return;
+                }
+                appState.compared.push(propertyId);
+                alert('✓ Property added to comparison\n\nComparing ' + appState.compared.length + ' properties');
+            }
+        }
+
+        function viewDetails(propertyId) {
+            alert('Opening property details for ID: ' + propertyId + '\n\nIn real project here property details page open hoga.');
+        }
+
+        // LOGIN / SIGNUP MODAL FUNCTIONS
+        function openLogin() {
+            document.getElementById("loginModal").style.display = "flex";
+        }
+        function closeLogin() {
+            document.getElementById("loginModal").style.display = "none";
+        }
+        function openSignup() {
+            document.getElementById("signupModal").style.display = "flex";
+        }
+        function closeSignup() {
+            document.getElementById("signupModal").style.display = "none";
+        }
+        function switchToSignup() {
+            closeLogin();
+            openSignup();
+        }
+        function switchToLogin() {
+            closeSignup();
+            openLogin();
+        }
+
+        function closeProfile() {
+            document.getElementById("profileModal").style.display = "none";
+        }
+    </script>
+
+    <!-- FIREBASE + AUTH CODE -->
+    <script>
+        // Tumhara actual config yaha rahega
+        const firebaseConfig = {
+           apiKey: "AIzaSyDDM1Vw61yLpoqS-YUUB5UzvWzgVISOz_w",
+            authDomain: "countryroof-babdb.firebaseapp.com",
+            databaseURL: "https://countryroof-babdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+             projectId: "countryroof-babdb",
+             storageBucket: "countryroof-babdb.firebasestorage.app",
+             messagingSenderId: "830451565152",
+             appId: "1:830451565152:web:baa86252e19c568cbdf905",
+              measurementId: "G-BGYCFTEG2Z"
+        };
+
+        // Init
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db   = firebase.database();
+
+        // SIGNUP (Email/Password)
+        async function emailSignup() {
+            const name   = document.getElementById("signupName").value.trim();
+            const email  = document.getElementById("signupEmail").value.trim();
+            const pass   = document.getElementById("signupPass").value.trim();
+            const number = document.getElementById("signupNumber").value.trim();
+
+            if (!name || !email || !pass) {
+                alert("Please fill name, email and password");
+                return;
+            }
+
+            try {
+                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+                const uid = userCred.user.uid;
+
+                // Save to DB
+                await db.ref("users/" + uid).set({
+                    name: name,
+                    email: email,
+                    number: number
+                });
+
+                alert("Account Created!");
+                closeSignup();
+                openLogin();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // LOGIN (Email/Password)
+        async function emailLogin() {
+            const email = document.getElementById("loginEmail").value.trim();
+            const pass  = document.getElementById("loginPass").value.trim();
+
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                alert("Login Successful!");
+                closeLogin();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // GOOGLE LOGIN
+        async function googleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user   = result.user;
+
+                // Agar DB me user nahi hai to add kar do
+                const snap = await db.ref("users/" + user.uid).once("value");
+                if (!snap.exists()) {
+                    await db.ref("users/" + user.uid).set({
+                        name: user.displayName || "",
+                        email: user.email || "",
+                        number: ""
+                    });
+                }
+
+                closeLogin();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // LOGOUT
+        async function logout() {
+            await auth.signOut();
+            location.reload();
+        }
+
+        // AVATAR CLICK
+        document.getElementById("avatarCircle").onclick = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const snap = await db.ref("users/" + user.uid).once("value");
+            const data = snap.val() || {};
+
+            document.getElementById("profName").innerText   = "Name: "   + (data.name   || user.displayName || "");
+            document.getElementById("profEmail").innerText  = "Email: "  + (data.email  || user.email       || "");
+            document.getElementById("profNumber").innerText = "Number: " + (data.number || "");
+
+            document.getElementById("profileModal").style.display = "flex";
+        };
+
+        // AUTH STATE CHANGE
+        auth.onAuthStateChanged(async (user) => {
+            const loginBtn   = document.getElementById("loginBtn");
+            const userAvatar = document.getElementById("userAvatar");
+            const avatarCircle = document.getElementById("avatarCircle");
+
+            if (user) {
+                // User logged in
+                if (loginBtn) loginBtn.style.display = "none";
+                userAvatar.style.display = "flex";
+
+                // DB se data
+                let data = null;
+                try {
+                    const snap = await db.ref("users/" + user.uid).once("value");
+                    data = snap.val();
+                } catch (e) {
+                    console.warn("DB read error:", e);
+                }
+
+                const name = (data && data.name) || user.displayName || user.email || "";
+                const firstChar = name ? name.charAt(0).toUpperCase() : "?";
+                avatarCircle.innerText = firstChar;
+
+                // LocalStorage me save
+                const userForStore = {
+                    name:   name,
+                    email:  (data && data.email)  || user.email || "",
+                    number: (data && data.number) || ""
+                };
+                localStorage.setItem("user", JSON.stringify(userForStore));
+            } else {
+                // User logged out
+                if (loginBtn) loginBtn.style.display = "block";
+                userAvatar.style.display = "none";
+                localStorage.removeItem("user");
+            }
+        });
+    </script>
+</body>
+</html>

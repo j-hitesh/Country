@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Property</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 650px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+}
+h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+.tab-group, .sub-tabs, .type-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.tab, .sub-tab, .type-tab {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 1px solid #d0d5e2;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+.tab.active, .sub-tab.active, .type-tab.active {
+    background: #0057ff;
+    color: white;
+    border-color: #0057ff;
+}
+input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid #ced3df;
+    border-radius: 10px;
+    font-size: 15px;
+}
+button {
+    width: 100%;
+    padding: 15px;
+    background: #0057ff;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: 600;
+}
+button:hover {
+    background: #0044cc;
+}
+h4 {
+    margin: 10px 0;
+    font-size: 16px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Start posting your property, it’s free</h2>
+
+    <!-- SELL / BUY -->
+    <div class="tab-group">
+        <div class="tab active" onclick="selectDeal('sell', this)">Sell</div>
+        <div class="tab" onclick="selectDeal('buy', this)">Buy</div>
+    </div>
+
+    <h4>And it's a ...</h4>
+
+    <!-- RESIDENTIAL / COMMERCIAL -->
+    <div class="sub-tabs">
+        <div class="sub-tab active" onclick="selectCategory('residential', this)">Residential</div>
+        <div class="sub-tab" onclick="selectCategory('commercial', this)">Commercial</div>
+    </div>
+
+    <!-- PROPERTY TYPE -->
+    <div class="type-tabs">
+        <div class="type-tab active" onclick="selectType('Flat / Apartment', this)">Flat / Apartment</div>
+        <div class="type-tab" onclick="selectType('Independent House / Villa', this)">Independent House / Villa</div>
+        <div class="type-tab" onclick="selectType('Builder Floor', this)">Builder Floor</div>
+        <div class="type-tab" onclick="selectType('Plot / Land', this)">Plot / Land</div>
+    </div>
+
+    <h4>Your contact details for the buyer to reach you</h4>
+    <input type="text" id="phone" placeholder="Enter phone number">
+
+    <button onclick="submitData()">Start Now</button>
+
+</div>
+
+<script>
+/* ---------------- FIREBASE CONFIG ---------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyA-kPA0lHKfq0540py5gw3bddUDVUzmTWo",
+  authDomain: "countryroof-65fe5.firebaseapp.com",
+  databaseURL: "https://countryroof-65fe5-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "countryroof-65fe5",
+  storageBucket: "countryroof-65fe5.firebasestorage.app",
+  messagingSenderId: "1089361482732",
+  appId: "1:1089361482732:web:bc3a29e4521479cd8f66c9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---------------- UI SELECTION ---------------- */
+let dealType = "sell";
+let category = "residential";
+let propertyType = "Flat / Apartment";
+
+function selectDeal(val, el) {
+    dealType = val;
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+}
+
+function selectCategory(val, el) {
+    category = val;
+    document.querySelectorAll(".sub-tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+}
+
+function selectType(val, el) {
+    propertyType = val;
+    document.querySelectorAll(".type-tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+}
+
+/* ---------------- SAVE TO FIREBASE ---------------- */
+function submitData() {
+    const phone = document.getElementById("phone").value.trim();
+
+    if (phone.length < 10) {
+        alert("Please enter a valid phone number");
+        return;
+    }
+
+    const id = Date.now(); // unique id
+
+    db.ref("postRequests/" + id).set({
+        dealType: dealType,
+        category: category,
+        propertyType: propertyType,
+        phone: phone,
+        time: new Date().toISOString()
+    })
+    .then(() => {
+        alert("Your request has been submitted!");
+        document.getElementById("phone").value = "";
+    })
+    .catch(err => {
+        alert("Error: " + err.message);
+    });
+}
+</script>
+
+</body>
+</html>
